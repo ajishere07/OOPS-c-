@@ -2,6 +2,16 @@ using System;
 
 namespace HelloWorld
 {
+
+	public interface IDepositable{
+		void Deposit(decimal amount);
+	}
+
+	public interface IWithdrawable{
+		void Withdraw(decimal amount);
+	}
+
+
 	public interface INotification{
 		void Send(BankAccount account);
 	}
@@ -35,13 +45,10 @@ namespace HelloWorld
 
 		public decimal Balance {get; protected set;}
 
-		// public BankAccount(string accountHolder){
-		// 	AccountHolder= accountHolder;
-		// 	Balance = 0;
-		// }
-
-		public abstract void Deposit(decimal amount);
-		public abstract void Withdraw(decimal amount);
+		public BankAccount(string accountHolder){
+			AccountHolder= accountHolder;
+			Balance = 0;
+		}
 
         public void displayBalance(){
 			Console.WriteLine($"Balance : {Balance}");
@@ -67,16 +74,13 @@ namespace HelloWorld
 
 	}
 
-	public class SavingsAccount : BankAccount{
-		public SavingsAccount(string accountHolder){
-			AccountHolder= accountHolder;
-			Balance = 0;
-		}
-			public override void Deposit(decimal amount){
+	public class SavingsAccount : BankAccount, IWithdrawable, IDepositable {
+		public SavingsAccount(string accountHolder): base(accountHolder){}
+			public void Deposit(decimal amount){
 				Balance += amount;
 				Console.WriteLine($"{amount} deposited.");
 			}
-            public override void Withdraw(decimal amount){
+            public void Withdraw(decimal amount){
                 if(Balance >= amount){
 		            Balance -= amount;
 				    Console.WriteLine($"{amount} withdrawn.");
@@ -88,31 +92,20 @@ namespace HelloWorld
 		}
 
 
-		public class FixedDepositAccount : BankAccount{
-			public FixedDepositAccount(string accountHolder){
-			AccountHolder= accountHolder;
-			Balance = 0;
-		}
-			public override void Deposit(decimal amount)
+		public class FixedDepositAccount : BankAccount, IDepositable{
+			public FixedDepositAccount(string accountHolder): base(accountHolder){}
+			public void Deposit(decimal amount)
 			{
 				Balance += amount;
 				Console.WriteLine($"{amount} deposited.");
 			}
-
-			public override void Withdraw(decimal amount)
-			{
-				throw new InvalidOperationException("Withdrawal not allowed.");
-			}
-		}
+		}	
 
 
 
 	public class Program
 	{
-		public static void ProcessWithdrawal(BankAccount account)
-		{
-			account.Withdraw(100);
-		}
+		
 
 		static void Main(){
 			// BankAccount ac = new BankAccount("joohn");
@@ -123,11 +116,14 @@ namespace HelloWorld
 			// ac.displayBalance();
 
 
-			BankAccount account = new FixedDepositAccount("john");
+			SavingsAccount account = new SavingsAccount("john");
+			// no ISP helps us moving the runtime error to cmopile time 
+			FixedDepositAccount account2 = new FixedDepositAccount("emily");
+	     	account2.Withdraw(100);
+
 			account.Deposit(100);
 			account.displayBalance();
-			ProcessWithdrawal(account);
-
+		
 
 
 			account.Withdraw(10);
