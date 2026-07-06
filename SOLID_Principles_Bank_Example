@@ -2,11 +2,22 @@ using System;
 
 namespace HelloWorld
 {
-	public class NotificationService{
-		public void SendEmail(BankAccount account){
-			Console.WriteLine($"email sent to {account.AccountHolder}");
+	public interface INotification{
+		void Send(BankAccount account);
+	}
+
+	public class SMSNotification : INotification{
+		public void Send(BankAccount account){
+			Console.WriteLine($"SMS sent to {account.AccountHolder}");
 		}
 	}
+
+	public class EmailNotification  : INotification{
+		public void Send(BankAccount account){
+			Console.WriteLine($"Email sent to {account.AccountHolder}");
+		}
+	}
+
 
 	public class ReceiptPrinter{
 		public void Print(BankAccount account){
