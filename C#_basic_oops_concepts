@@ -1,0 +1,84 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace HelloWorld
+{
+
+
+
+    interface IIgnition{
+		void ignite();
+	}
+	public abstract class Vehicle{
+
+		public Vehicle(){
+			Console.WriteLine("constructor here");
+		}
+
+	
+
+		protected string brand;
+		protected string color;
+
+		public void setBrand(string b){
+			brand = b;	
+		}
+
+		public void setColor(string c){
+			color = c;	
+		}
+
+		public string getBrand(){
+			return brand;
+		}
+
+		public abstract void horn();
+	}
+
+	public class Scooter : Vehicle, IIgnition {
+		public Scooter(){
+			Console.WriteLine("has 2 wheels");
+		}
+
+		public override void horn(){
+			Console.WriteLine("beep beep");
+		}
+
+		public void ignite(){
+			Console.WriteLine("using key");
+		}
+	}
+
+	public class Car : Vehicle{
+		public Car(){
+			Console.WriteLine("has 4 wheels");
+		}
+
+		public override void horn(){
+			Console.WriteLine("hmm hmm");
+		}
+	}
+
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			
+			Scooter jupiter = new Scooter();
+			Car toyota = new Car();
+
+			jupiter.setBrand("Jupiter");
+				
+			Console.WriteLine(jupiter.getBrand());
+
+			jupiter.horn();
+
+			toyota.horn();
+
+			jupiter.ignite();
+
+		}
+	}
+}
