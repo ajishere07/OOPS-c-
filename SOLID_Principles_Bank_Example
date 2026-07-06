@@ -21,7 +21,7 @@ namespace HelloWorld
 
 	public class ReceiptPrinter{
 		public void Print(BankAccount account){
-			Console.WriteLine($"email sent to {account.AccountHolder}");
+			Console.WriteLine($"receipt sent to {account.AccountHolder}");
 		}
 	}
 	public class AccountRepository{
@@ -29,33 +29,25 @@ namespace HelloWorld
 			Console.WriteLine($"Saving {account.AccountHolder} to database.");
 		}
 	}
-	public class BankAccount
+	public abstract class BankAccount
 	{
 		public string AccountHolder {get; set;}
 
-		public decimal Balance {get; private set;}
+		public decimal Balance {get; protected set;}
 
-		public BankAccount(string accountHolder){
-			AccountHolder= accountHolder;
-			Balance = 0;
-		}
+		// public BankAccount(string accountHolder){
+		// 	AccountHolder= accountHolder;
+		// 	Balance = 0;
+		// }
 
-		public void Deposit(decimal amount){
-			Balance +=amount;
-			Console.WriteLine($"{amount} deposited.");
-		}
-		public void Withdraw(decimal amount){
-			if(Balance >= amount){
-				Balance -= amount;
-				Console.WriteLine($"{amount} withdrawn.");
-			}else{
-				Console.WriteLine("Insufficient balance.");
-			}
-		}
+		public abstract void Deposit(decimal amount);
+		public abstract void Withdraw(decimal amount);
 
         public void displayBalance(){
 			Console.WriteLine($"Balance : {Balance}");
 		}
+
+		
         // bad design all methods in single class irrelevent to this class
 		
 // a
@@ -75,8 +67,53 @@ namespace HelloWorld
 
 	}
 
+	public class SavingsAccount : BankAccount{
+		public SavingsAccount(string accountHolder){
+			AccountHolder= accountHolder;
+			Balance = 0;
+		}
+			public override void Deposit(decimal amount){
+				Balance += amount;
+				Console.WriteLine($"{amount} deposited.");
+			}
+            public override void Withdraw(decimal amount){
+                if(Balance >= amount){
+		            Balance -= amount;
+				    Console.WriteLine($"{amount} withdrawn.");
+			    }else{
+				    Console.WriteLine("Insufficient balance.");
+		     	}
+			}
+			
+		}
+
+
+		public class FixedDepositAccount : BankAccount{
+			public FixedDepositAccount(string accountHolder){
+			AccountHolder= accountHolder;
+			Balance = 0;
+		}
+			public override void Deposit(decimal amount)
+			{
+				Balance += amount;
+				Console.WriteLine($"{amount} deposited.");
+			}
+
+			public override void Withdraw(decimal amount)
+			{
+				throw new InvalidOperationException("Withdrawal not allowed.");
+			}
+		}
+
+
+
 	public class Program
 	{
+		public static void ProcessWithdrawal(BankAccount account)
+		{
+			account.Withdraw(100);
+		}
+
 		static void Main(){
 			// BankAccount ac = new BankAccount("joohn");
 			// ac.Deposit(32);
@@ -86,9 +123,11 @@ namespace HelloWorld
 			// ac.displayBalance();
 
 
-			BankAccount account = new BankAccount("John");
+			BankAccount account = new FixedDepositAccount("john");
 			account.Deposit(100);
 			account.displayBalance();
+			ProcessWithdrawal(account);
+
 
 
 			account.Withdraw(10);
@@ -96,10 +135,10 @@ namespace HelloWorld
 
   			AccountRepository repository = new AccountRepository();
             ReceiptPrinter printer = new ReceiptPrinter();
-			NotificationService notify = new NotificationService();
+			INotification notify = new SMSNotification();
 
 			repository.Save(account);
-			notify.SendEmail(account);
+			notify.Send(account);
 			printer.Print(account);
 
 		}
