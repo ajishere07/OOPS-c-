@@ -2,7 +2,28 @@ using System;
 
 namespace HelloWorld
 {
+	public class BankingService{
+		private readonly IAccountRepository repository;
+		private readonly INotification notification;
+		private readonly IReceiptPrinter printer;
 
+		public BankingService(
+		IAccountRepository repository,
+		INotification notification,
+		IReceiptPrinter printer){
+			this.repository = repository;
+			this.notification = notification;
+			this.printer = printer;
+		}
+
+
+		public void OpenAccount(BankAccount account){
+          repository.Save(account);
+		  notification.Send(account);
+		  printer.Print(account);	
+		}
+
+	}
 	public interface IDepositable{
 		void Deposit(decimal amount);
 	}
@@ -28,13 +49,19 @@ namespace HelloWorld
 		}
 	}
 
-
-	public class ReceiptPrinter{
+    public interface IReceiptPrinter{
+		void Print(BankAccount account);
+	}
+	public interface IAccountRepository{
+		void Save(BankAccount account);
+	}
+	public class ReceiptPrinter:IReceiptPrinter{
 		public void Print(BankAccount account){
 			Console.WriteLine($"receipt sent to {account.AccountHolder}");
 		}
 	}
-	public class AccountRepository{
+
+	public class AccountRepository:IAccountRepository{
 		public void Save(BankAccount account){
 			Console.WriteLine($"Saving {account.AccountHolder} to database.");
 		}
@@ -116,26 +143,35 @@ namespace HelloWorld
 			// ac.displayBalance();
 
 
-			SavingsAccount account = new SavingsAccount("john");
+			// SavingsAccount account = new SavingsAccount("john");
 			// no ISP helps us moving the runtime error to cmopile time 
-			FixedDepositAccount account2 = new FixedDepositAccount("emily");
-	     	account2.Withdraw(100);
+			//FixedDepositAccount account2 = new FixedDepositAccount("emily");
+	     	//account2.Withdraw(100);
 
-			account.Deposit(100);
-			account.displayBalance();
+			// account.Deposit(100);
+			// account.displayBalance();
 		
+			// account.Withdraw(10);
+			// account.displayBalance();
+
+  			// AccountRepository repository = new AccountRepository();
+            // ReceiptPrinter printer = new ReceiptPrinter();
+			// INotification notify = new SMSNotification();
+
+			// repository.Save(account);
+			// notify.Send(account);
+			// printer.Print(account);
 
 
-			account.Withdraw(10);
-			account.displayBalance();
+			SavingsAccount account = new SavingsAccount("John");
+			account.Deposit(1000);
 
-  			AccountRepository repository = new AccountRepository();
-            ReceiptPrinter printer = new ReceiptPrinter();
-			INotification notify = new SMSNotification();
+			AccountRepository repository = new AccountRepository();
+			ReceiptPrinter printer = new ReceiptPrinter();
+			INotification notification = new EmailNotification();
 
-			repository.Save(account);
-			notify.Send(account);
-			printer.Print(account);
+			BankingService service = new BankingService(repository, notification, printer);
+            service.OpenAccount(account);
 
 		}
 	}
