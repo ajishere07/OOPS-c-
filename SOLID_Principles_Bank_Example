@@ -128,6 +128,25 @@ namespace HelloWorld
 			}
 		}	
 
+		// using the factory design pattern here
+
+		public static class BankAccountFactory
+		{
+				public static BankAccount Create(string type, string holder)
+				{
+
+					switch(type){
+						case "Savings":
+						 return new SavingsAccount(holder);
+						case "Fixed":
+						 return new FixedDepositAccount(holder);
+						default:
+						 throw new ArgumentException("Invalid account type.");
+					}
+					
+				}
+		}
+
 
 
 	public class Program
@@ -163,8 +182,17 @@ namespace HelloWorld
 			// printer.Print(account);
 
 
-			SavingsAccount account = new SavingsAccount("John");
-			account.Deposit(1000);
+			BankAccount account = BankAccountFactory.Create("Savings","john");
+			if(account is IDepositable despositable){
+				despositable.Deposit(1000);
+			}
+
+			BankAccount account2 = BankAccountFactory.Create("Fixed", "raghav");
+
+			if(account2 is IDepositable despositableRaghav){
+				despositableRaghav.Deposit(1000);
+			}
+
 
 			AccountRepository repository = new AccountRepository();
 			ReceiptPrinter printer = new ReceiptPrinter();
@@ -172,6 +200,8 @@ namespace HelloWorld
 
 			BankingService service = new BankingService(repository, notification, printer);
             service.OpenAccount(account);
+			service.OpenAccount(account2);
+
 
 		}
 	}
